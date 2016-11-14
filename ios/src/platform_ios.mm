@@ -62,46 +62,38 @@ bool isContinuousRendering() {
 
 }
 
-NSString* resolvePath(const char* _path) {
+NSURL* resolvePath(const char* _path) {
 
     NSString* path = [NSString stringWithUTF8String:_path];
 
-    if (*_path == '/') { return path; }
-
-    NSString* resources = [[NSBundle mainBundle] resourcePath];
-    NSString* fullBundlePath = [resources stringByAppendingPathComponent:path];
+    NSURL* appResources = [[NSBundle mainBundle] resourceURL];
+    NSURL* appBundlePath = [NSURL URLWithString:path relativeToURL:appResources];
     NSFileManager* fileManager = [NSFileManager defaultManager];
 
-    if ([fileManager fileExistsAtPath:fullBundlePath]) {
-        return fullBundlePath;
-    }
+    bool fileExistsInBundle = [fileManager fileExistsAtPath:[appBundlePath absoluteString]];
 
-    if (tangramFramework) {
-        NSString* resources = [tangramFramework resourcePath];
-        fullBundlePath = [resources stringByAppendingPathComponent:path];
+    if (!fileExistsInBundle && tangramFramework) {
+        NSURL* frameworkResources = [tangramFramework resourceURL];
+        frameworkBundlePath = [resources stringByAppendingPathComponent:path];
 
-        if ([fileManager fileExistsAtPath:fullBundlePath]) {
-            return fullBundlePath;
+        if ([fileManager fileExistsAtPath:[frameworkBundlePath absoluteString]]) {
+            return frameworkBundlePath;
         }
     }
 
-    return nil;
+    return appBundlePath;
 }
 
 std::string stringFromFile(const char* _path) {
 
-    NSString* path = resolvePath(_path);
+    NSURL* url = resolvePath(_path);
 
-    if (!path) {
-        return "";
-    }
-
-    NSString* str = [NSString stringWithContentsOfFile:path
-                                          usedEncoding:NULL
-                                                 error:NULL];
+    NSString* str = [NSString stringWithContentsOfURL:url
+                                         usedEncoding:NULL
+                                                error:NULL];
 
     if (str == nil) {
-        LOGW("Failed to read file at path: %s\n", [path UTF8String]);
+        LOGW("Failed to read file at path: %s (resolved to: %s)\n", _path, [[url absoluteString] UTF8String]);
         return std::string();
     }
 
@@ -110,11 +102,11 @@ std::string stringFromFile(const char* _path) {
 
 unsigned char* bytesFromFile(const char* _path, size_t& _size) {
 
-    NSString* path = resolvePath(_path);
-    NSMutableData* data = [NSMutableData dataWithContentsOfFile:path];
+    NSURL* url = resolvePath(_path);
+    NSMutableData* data = [NSMutableData dataWithContentsOfURL:url];
 
     if (data == nil) {
-        LOGW("Failed to read file at path: %s\n", [path UTF8String]);
+        LOGW("Failed to read file at path: %s (resolved to: %s)\n", _path, [[url absoluteString] UTF8String]);
         _size = 0;
         return nullptr;
     }
