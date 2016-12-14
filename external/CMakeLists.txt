@@ -58,6 +58,8 @@ set_target_properties(geojson-vt-cpp
   PROPERTIES COMPILE_FLAGS -DGEOJSONVT_CUSTOM_TAGS)
 
 target_compile_options(geojson-vt-cpp
+  PRIVATE
+  ${EXTERNAL_CXX_FLAGS}
   PUBLIC
   -Wno-unknown-pragmas)
 
@@ -68,6 +70,7 @@ add_library(duktape
   ${CMAKE_CURRENT_SOURCE_DIR}/duktape/duktape.c)
 
 target_compile_options(duktape PRIVATE
+  ${EXTERNAL_CXX_FLAGS}
   -fstrict-aliasing
   -fomit-frame-pointer
   -std=c99
@@ -115,6 +118,8 @@ if(PLATFORM_LINUX OR PLATFORM_OSX)
       -ldl)
 
     target_compile_options(glfw
+      PUBLIC
+      ${EXTERNAL_CXX_FLAGS}
       PRIVATE
       -O3 -DNDEBUG)
 
@@ -136,6 +141,7 @@ if((BENCHMARK OR USE_EXTERNAL_LIBS) AND (PLATFORM_LINUX OR PLATFORM_OSX))
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/benchmark)
   target_compile_options(benchmark
     PRIVATE
+    ${EXTERNAL_CXX_FLAGS}
     -O3 -DNDEBUG)
 
   if(USE_EXTERNAL_LIBS)

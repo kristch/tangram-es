@@ -1,6 +1,5 @@
 include(${CMAKE_SOURCE_DIR}/toolchains/iOS.toolchain.cmake)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(ARCH "armv7 armv7s arm64 i386 x86_64")
 set(SUPPORTED_PLATFORMS "iphonesimulator iphoneos")
 set(TANGRAM_FRAMEWORK ${PROJECT_SOURCE_DIR}/${TANGRAM_FRAMEWORK})
@@ -35,7 +34,9 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
 set_source_files_properties(${TANGRAM_FRAMEWORK} PROPERTIES
     MACOSX_PACKAGE_LOCATION ${EXECUTABLE_NAME}.app/Frameworks)
 
-if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set_xcode_property(${EXECUTABLE_NAME} GCC_GENERATE_DEBUGGING_SYMBOLS NO)
+else()
     set_xcode_property(${EXECUTABLE_NAME} GCC_GENERATE_DEBUGGING_SYMBOLS YES)
 endif()
 
