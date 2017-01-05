@@ -5,6 +5,7 @@
 #include "labels/screenTransform.h"
 #include "labels/spriteLabel.h"
 #include "tile/tileID.h"
+#include "util/lineSampler.h"
 
 #include "isect2d.h"
 #include "glm_vec.h" // for isect2d.h

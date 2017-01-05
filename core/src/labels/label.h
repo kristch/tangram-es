@@ -32,7 +32,8 @@ public:
     enum class Type {
         point,
         line,
-        debug,
+        curved,
+        debug
     };
 
     enum State {

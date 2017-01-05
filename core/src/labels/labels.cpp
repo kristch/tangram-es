@@ -13,6 +13,7 @@
 #include "labels/labelSet.h"
 #include "labels/textLabel.h"
 #include "marker/marker.h"
+#include "labels/curvedLabel.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -113,6 +114,8 @@ void Labels::updateLabels(const ViewState& _viewState, float _dt,
     bool drawAllLabels = Tangram::getDebugFlag(DebugFlags::draw_all_labels);
 
     for (const auto& tile : _tiles) {
+
+        //LOG("tile: %d/%d z:%d,%d", tile->getID().x, tile->getID().y, tile->getID().z, tile->getID().s);
 
         // discard based on level of detail
         // if ((zoom - tile->getID().z) > lodDiscard) {
@@ -269,6 +272,12 @@ bool Labels::labelComparator(const LabelEntry& _a, const LabelEntry& _b) {
 
     if (l1->hash() != l2->hash()) {
         return l1->hash() < l2->hash();
+    }
+
+    if (l1->type() == Label::Type::curved &&
+        l2->type() == Label::Type::curved) {
+        return (static_cast<const CurvedLabel*>(l1)->candidatePriority() >
+                static_cast<const CurvedLabel*>(l2)->candidatePriority());
     }
 
     return l1 < l2;
@@ -495,6 +504,19 @@ void Labels::drawDebug(RenderState& rs, const View& _view) {
                                  label->parent()->screenCenter());
         }
 
+        if (label->type() == Label::Type::curved) {
+            //for (int i = entry.transform.start; i < entry.transform.end()-2; i++) {
+            for (int i = entry.transform.start; i < entry.transform.end()-1; i++) {
+                if (i % 2 == 0) {
+                    Primitives::setColor(rs, 0xff0000);
+                } else {
+                    Primitives::setColor(rs, 0x0000ff);
+
+                }
+                Primitives::drawLine(rs, glm::vec2(m_transforms.points[i]),
+                                     glm::vec2(m_transforms.points[i+1]));
+            }
+        }
 #if 0
         // draw offset
         glm::vec2 rot = label->screenTransform().rotation;
